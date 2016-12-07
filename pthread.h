@@ -364,7 +364,7 @@ enum
 #define PTHREAD_KEYS_MAX                        _POSIX_THREAD_KEYS_MAX
 
 #undef PTHREAD_STACK_MIN
-#define PTHREAD_STACK_MIN                       0
+#define PTHREAD_STACK_MIN                       32*1024
 
 #undef _POSIX_THREAD_THREADS_MAX
 #define _POSIX_THREAD_THREADS_MAX               64
