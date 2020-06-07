@@ -621,3 +621,18 @@ int ftime(struct timeb *tb)
 
   return 0;
 }
+
+/****************************************************************************
+ *
+ * Enable pthread before main
+ *
+ ***************************************************************************/
+
+void __sinit(struct _reent *);
+
+__attribute__((constructor(101)))
+void pthread_setup(void) 
+{
+    pthread_init();
+    __sinit(_REENT);
+}
