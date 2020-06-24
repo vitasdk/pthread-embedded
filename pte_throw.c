@@ -77,7 +77,7 @@ pte_throw (unsigned int exception)
        * explicit thread exit here after cleaning up POSIX
        * residue (i.e. cleanup handlers, POSIX thread handle etc).
        */
-      unsigned exitCode = 0;
+      /*unsigned exitCode = 0;
 
       switch (exception)
         {
@@ -87,7 +87,7 @@ pte_throw (unsigned int exception)
         case PTE_EPS_EXIT:
           exitCode = (unsigned) sp->exitStatus;;
           break;
-        }
+        }*/
 
       pte_thread_detach_and_exit_np ();
 
