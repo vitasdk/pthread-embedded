@@ -463,6 +463,10 @@ extern "C"
     void pte_threadDestroy (pthread_t tid);
     void pte_threadExitAndDestroy (pthread_t tid);
 
+    pte_cleanup_t *  pte_pop_cleanup (int execute);
+    void  pte_push_cleanup (pte_cleanup_t * cleanup,
+                        void (*routine) (void *),
+                        void *arg);
     void pte_pop_cleanup_all (int execute);
 
     pthread_t pte_new (void);
