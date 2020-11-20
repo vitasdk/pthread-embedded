@@ -48,6 +48,8 @@
 #include "pthread.h"
 #include "implement.h"
 
+extern unsigned int _pthread_stack_default_user __attribute__((weak));
+
 int
 pthread_create (pthread_t * tid,
                 const pthread_attr_t * attr,
@@ -177,7 +179,7 @@ pthread_create (pthread_t * tid,
       /*
        * Default stackSize
        */
-      stackSize = PTHREAD_STACK_MIN;
+      stackSize = &_pthread_stack_default_user != NULL? _pthread_stack_default_user : PTHREAD_STACK_MIN;
 
     }
 
