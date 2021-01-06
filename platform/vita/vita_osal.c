@@ -630,7 +630,7 @@ int ftime(struct timeb *tb)
 
 void __sinit(struct _reent *);
 
-__attribute__((constructor(101)))
+__attribute__((constructor(101), used))
 void pthread_setup(void) 
 {
     pthread_init();
