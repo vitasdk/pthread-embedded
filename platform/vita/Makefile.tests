@@ -4,7 +4,13 @@ CLEANUP_TYPE=C
 
 VPATH = ../../tests
 
-TARGET = pthread-psp-test
+PROJECT = pthread-test
+
+STRIP := arm-vita-eabi-strip
+
+PROJECT_TITLE := PTHREAD TEST
+PROJECT_TITLEID := VSDK00007
+
 
 MUTEX_TEST_OBJS = \
   mutex1.o \
@@ -170,13 +176,20 @@ EXCEPTION_TEST_OBJS = \
 OBJS = $(MUTEX_TEST_OBJS) $(MISC_OBJS) $(MISC_TEST_OBJS) $(THREAD_TEST_OBJS) $(SEM_TEST_OBJS) $(BARRIER_TEST_OBJS) $(SPIN_TEST_OBJS) $(CONDVAR_TEST_OBJS) $(RWLOCK_TEST_OBJS) $(CANCEL_TEST_OBJS) $(BENCH_TEST_OBJS) $(EXCEPTION_TEST_OBJS)
 
 
-INCDIR = 
-CFLAGS = $(GLOBAL_CFLAGS) -O2 -Wall -g -I..  -fno-strict-aliasing  -I../.. -G0
+PREFIX ?= ${VITASDK}/arm-vita-eabi
+CC = arm-vita-eabi-gcc
+CXX = arm-vita-eabi-g++
+AR = arm-vita-eabi-ar
+
+CFLAGS = $(GLOBAL_CFLAGS) -Wl,-q -Wall -O3 -ffat-lto-objects -flto -fno-strict-aliasing -I. -I../.. -I../helper
 CXXFLAGS = $(CFLAGS) -fexceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
+
+INCDIR = 
+
 LDFLAGS = -L../..
-LIBS = -lc -lpthread-psp -lstdc++
+LIBS = -lc -lpthread
 
 ifeq ($(CLEANUP_TYPE),CPPXX)
 
@@ -184,12 +197,7 @@ LIBS += -lstdc++
 
 endif
 
-PSPSDK=$(shell psp-config --pspsdk-path)
-include $(PSPSDK)/lib/build.mak
-
 ifeq ($(CLEANUP_TYPE),CPPXXX)
-
-CC=psp-g++
 
 exception1.o: exception1.c
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) $(TARGET_ARCH) \
@@ -204,9 +212,42 @@ exception3.o: exception3.c
 	  -c ../../tests/exception3.c -o exception3.o
 endif
 
+#default: all
 
-install: $(TARGET_LIB)
-	@cp -v $(TARGET_LIB) `psp-config --psp-prefix`/lib
-	@cp -v *.h `psp-config --psp-prefix`/include
-	@echo "Done."
+#all: $(TARGET)
 
+#$(TARGET): $(OBJS)
+#	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
+
+
+all: package
+
+package: $(PROJECT).vpk
+
+$(PROJECT).vpk: eboot.bin param.sfo
+	vita-pack-vpk -s param.sfo -b eboot.bin \
+	--add sce_sys/icon0.png=sce_sys/icon0.png \
+	--add sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
+	--add sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
+	--add sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+	$(PROJECT).vpk
+
+$(PROJECT).vpk: eboot.bin param.sfo
+	vita-pack-vpk -s param.sfo -b eboot.bin
+	$(PROJECT).vpk
+
+eboot.bin: $(PROJECT).velf
+	vita-make-fself $(PROJECT).velf eboot.bin
+
+param.sfo:
+	vita-mksfoex -s TITLE_ID="PTRD00000" "PTHREAD TEST" param.sfo
+
+$(PROJECT).velf: $(PROJECT).elf
+	$(STRIP) -g $<
+	vita-elf-create $< $@
+
+$(PROJECT).elf: $(OBJS)
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@
+
+clean:
+	rm -rf $(PROJECT) $(OBJS) eboot.bin param.sfo $(PROJECT).elf $(PROJECT).velf $(PROJECT).vpk
