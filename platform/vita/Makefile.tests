@@ -232,10 +232,6 @@ $(PROJECT).vpk: eboot.bin param.sfo
 	--add sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
 	$(PROJECT).vpk
 
-$(PROJECT).vpk: eboot.bin param.sfo
-	vita-pack-vpk -s param.sfo -b eboot.bin
-	$(PROJECT).vpk
-
 eboot.bin: $(PROJECT).velf
 	vita-make-fself $(PROJECT).velf eboot.bin
 
