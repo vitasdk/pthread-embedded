@@ -77,10 +77,6 @@ BARRIER_TEST_OBJS = \
   barrier4.o \
   barrier5.o 
 
-# Tests excluded because cancellation is not implemented
-#  semaphore4.o 
-#  semaphore4t.o 
-
 THREAD_TEST_OBJS = \
   create1.o \
   create2.o \
