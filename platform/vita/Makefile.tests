@@ -100,8 +100,6 @@ THREAD_TEST_OBJS = \
   exit3.o \
   exit4.o \
   exit5.o \
-  reuse1.o \
-  reuse2.o \
   priority1.o \
   priority2.o \
   inherit1.o
