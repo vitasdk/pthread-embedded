@@ -104,7 +104,7 @@ int pthread_test_create3()
   pthread_t mt;
   pthread_t t[NUMTHREADS];
 
-  assert((mt = pthread_self()).p != NULL);
+  assert((mt = pthread_self()) != 0);
 
   /* Avoid compiler warning */
   mt = mt;

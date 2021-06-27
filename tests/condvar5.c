@@ -130,7 +130,7 @@ int pthread_test_condvar5()
 
   cvthing.shared = 0;
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
 
   assert(cvthing.notbusy == PTHREAD_COND_INITIALIZER);
 

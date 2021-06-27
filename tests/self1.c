@@ -67,7 +67,7 @@ int pthread_test_self1()
 
   self = pthread_self();
 
-  assert(self.p != NULL);
+  assert(self != NULL);
 
 #ifdef PTW32_STATIC_LIB
 //	pthread_win32_process_detach_np();

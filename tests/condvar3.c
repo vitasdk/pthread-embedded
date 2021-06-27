@@ -117,7 +117,7 @@ int pthread_test_condvar3()
   struct _timeb currSysTime;
   const unsigned int NANOSEC_PER_MILLISEC = 1000000;
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
 
   assert(pthread_cond_init(&cv, NULL) == 0);
 

@@ -175,7 +175,7 @@ int pthread_test_condvar6()
 
   cvthing.shared = 0;
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
 
   assert(cvthing.notbusy == PTHREAD_COND_INITIALIZER);
 
@@ -185,7 +185,7 @@ int pthread_test_condvar6()
 
 
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
 
   awoken = 0;
 
