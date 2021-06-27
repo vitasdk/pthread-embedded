@@ -123,7 +123,7 @@ pthread_create (pthread_t * tid,
       a = NULL;
     }
 
-  if ((thread = pte_new ()) == 0)
+  if ((thread = pte_new ()) == NULL)
     {
       goto FAIL0;
     }

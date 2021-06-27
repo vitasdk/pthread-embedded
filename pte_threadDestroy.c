@@ -63,7 +63,8 @@ pte_threadDestroyCommon (pthread_t thread, unsigned char shouldThreadExit)
        */
       memcpy (&threadCopy, tp, sizeof (threadCopy));
 
-      free(tp);
+      tp->threadId = 0;
+      tp->ptHandle = NULL;
 
       (void) pthread_mutex_destroy(&threadCopy.cancelLock);
       (void) pthread_mutex_destroy(&threadCopy.threadLock);

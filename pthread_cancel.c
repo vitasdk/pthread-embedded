@@ -80,7 +80,7 @@ pthread_cancel (pthread_t thread)
       return result;
     }
 
-  if ((self = pthread_self ()) == 0)
+  if ((self = pthread_self ()) == NULL)
     {
       return ENOMEM;
     };

@@ -90,7 +90,7 @@ pthread_join (pthread_t thread, void **value_ptr)
 
   pte_osMutexLock (pte_thread_reuse_lock);
 
-  if (NULL == tp)
+  if (NULL == thread || NULL == tp || tp->threadId == 0)
     {
       result = ESRCH;
     }

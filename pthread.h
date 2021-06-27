@@ -392,7 +392,7 @@ enum
      * that available with a simple pointer. It should scale for either
      * IA-32 or IA-64.
      */
-    typedef unsigned int pte_handle_t;
+    typedef unsigned int* pte_handle_t;
 
     typedef pte_handle_t pthread_t;
     typedef struct pthread_attr_t_ * pthread_attr_t;

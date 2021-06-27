@@ -85,7 +85,7 @@ pthread_kill (pthread_t thread, int sig)
 
   tp = (pte_thread_t *) thread;
 
-  if (0 == tp
+  if (NULL == thread || NULL == tp
       || 0 == tp->threadId)
     {
       result = ESRCH;
