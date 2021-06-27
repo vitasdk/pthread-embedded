@@ -109,7 +109,7 @@ static int osThread(void * arg)
   assert(bag->started == 0);
   bag->started = 1;
 
-  assert((bag->self = pthread_self()).p != NULL);
+  assert((bag->self = pthread_self()) != 0);
   assert(pthread_kill(bag->self, 0) == 0);
 
   /*
@@ -183,7 +183,7 @@ int pthread_test_exit5()
        */
       result = 1;
 
-      assert(threadbag[i].self.p != NULL && pthread_kill(threadbag[i].self, 0) == ESRCH);
+      assert(threadbag[i].self != 0 && pthread_kill(threadbag[i].self, 0) == ESRCH);
 
       fail = (result != 1);
 

@@ -133,20 +133,20 @@ int pthread_test_reuse2()
    */
   for (i = 0; i < NUMTHREADS; i++)
     {
-      if (t[i].p != NULL)
+      if (t[i] != 0)
         {
           unsigned int j, thisMax;
 
           thisMax = t[i].x;
 
           for (j = i+1; j < NUMTHREADS; j++)
-            if (t[i].p == t[j].p)
+            if (t[i] == t[j])
               {
                 if (t[i].x == t[j].x)
                   notUnique++;
                 if (thisMax < t[j].x)
                   thisMax = t[j].x;
-                t[j].p = NULL;
+                t[j].p = 0;
               }
 
           if (reuseMin > thisMax)

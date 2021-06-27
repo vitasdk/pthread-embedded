@@ -166,7 +166,7 @@ int pthread_test_cancel2()
 
   waitLock = PTHREAD_MUTEX_INITIALIZER;
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
   assert(pthread_mutex_lock(&waitLock) == 0);
 
   for (i = 1; i <= NUMTHREADS; i++)

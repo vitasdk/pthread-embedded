@@ -168,7 +168,7 @@ int pthread_test_condvar8()
   cvthing.lock = PTHREAD_MUTEX_INITIALIZER;
   start_flag = PTHREAD_MUTEX_INITIALIZER;
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
 
   assert(cvthing.notbusy == PTHREAD_COND_INITIALIZER);
 
@@ -181,7 +181,7 @@ int pthread_test_condvar8()
 
   abstime.tv_sec += 10;
 
-  assert((t[0] = pthread_self()).p != NULL);
+  assert((t[0] = pthread_self()) != 0);
 
   awoken = 0;
 
