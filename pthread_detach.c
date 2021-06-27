@@ -80,7 +80,7 @@ pthread_detach (pthread_t thread)
 
   pte_osMutexLock (pte_thread_reuse_lock);
 
-  if (NULL == tp)
+  if (NULL == thread || NULL == tp)
     {
       result = ESRCH;
     }

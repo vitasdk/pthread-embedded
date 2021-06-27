@@ -52,7 +52,7 @@ pthread_t
 pte_new (void)
 {
   pthread_t t;
-  pthread_t nil = 0;
+  pthread_t nil = NULL;
   pte_thread_t * tp;
 
   /*
@@ -68,7 +68,7 @@ pte_new (void)
     }
 
   /* ptHandle.p needs to point to it's parent pte_thread_t. */
-  t = tp->ptHandle = tp;
+  t = tp->ptHandle = (pthread_t)tp;
 
   /* Set default state. */
   tp->sched_priority = pte_osThreadGetMinPriority();
