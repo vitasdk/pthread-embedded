@@ -924,12 +924,14 @@ extern "C" {
                                         int pshared);
 
 #if PTE_LEVEL >= PTE_LEVEL_MAX - 1
-
+#include <signal.h>
     /*
      * Signal Functions. Should be defined in <signal.h> but we might
      * already have signal.h that don't define these.
      */
     int  pthread_kill(pthread_t thread, int sig);
+
+    int  pthread_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 
     /*
      * Non-portable functions
