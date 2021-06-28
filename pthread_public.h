@@ -181,6 +181,16 @@
 #include <setjmp.h>
 #include <limits.h>
 
+/*
+ * Boolean values to make us independent of system includes.
+ */
+enum
+{
+  PTE_FALSE = 0,
+  PTE_TRUE = (! PTE_FALSE)
+};
+
+
     /*
      * -------------------------------------------------------------
      *
@@ -377,8 +387,18 @@
 #define SEM_VALUE_MAX                           INT_MAX
 
 
-    typedef unsigned int pthread_t;
+#ifdef PTE_INTERNAL
+    /*
+     * Generic handle type - intended to extend uniqueness beyond
+     * that available with a simple pointer. It should scale for either
+     * IA-32 or IA-64.
+     */
+    typedef unsigned int* pte_handle_t;
 
+    typedef pte_handle_t pthread_t;
+#else
+    typedef unsigned int pthread_t;
+#endif
     typedef struct pthread_attr_t_ * pthread_attr_t;
     typedef struct pthread_once_t_ pthread_once_t;
     typedef struct pthread_key_t_ * pthread_key_t;
@@ -919,7 +939,7 @@ extern "C" {
      */
     int  pthread_kill(pthread_t thread, int sig);
 
-    int  pthread_sigmask(int how, const sigset_t *set, sigset_t *oldset)
+    int  pthread_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 
     /*
      * Non-portable functions
