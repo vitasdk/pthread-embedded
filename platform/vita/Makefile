@@ -47,6 +47,7 @@ THREAD_OBJS = \
   pte_tkAssocDestroy.o \
   pthread_kill.o \
   pthread_sigmask.o \
+  pthread_atfork.o \
   pthread_attr_destroy.o \
   pthread_attr_getdetachstate.o \
   pthread_attr_getinheritsched.o \

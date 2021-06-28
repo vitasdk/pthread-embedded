@@ -726,6 +726,10 @@ extern "C" {
     int  pthread_once (pthread_once_t * once_control,
                        void (*init_routine) (void));
 
+    int  pthread_atfork(void (*prepare)(void),
+                       void (*parent)(void),
+                       void (*child)(void));
+
 #if PTE_LEVEL >= PTE_LEVEL_MAX
     pte_cleanup_t *  pte_pop_cleanup (int execute);
 
