@@ -64,6 +64,8 @@ THREAD_OBJS = \
   pthread_attr_setscope.o \
   pthread_attr_setstackaddr.o \
   pthread_attr_setstacksize.o \
+  pthread_attr_getstack.o \
+  pthread_attr_setstack.o \
   pte_is_attr.o \
   pthread_exit.o \
   pthread_getschedparam.o \

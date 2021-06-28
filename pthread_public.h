@@ -713,6 +713,13 @@ extern "C" {
     int  pthread_attr_getscope (const pthread_attr_t *,
                                 int *);
 
+    int  pthread_attr_setstack(pthread_attr_t *attr,
+                               void *stackaddr,
+                               size_t stacksize);
+
+    int  pthread_attr_getstack(const pthread_attr_t *attr,
+                               void **stackaddr,
+                               size_t *stacksize);
     /*
      * PThread Functions
      */
