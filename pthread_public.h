@@ -720,6 +720,12 @@ extern "C" {
     int  pthread_attr_getstack(const pthread_attr_t *attr,
                                void **stackaddr,
                                size_t *stacksize);
+
+    int  pthread_attr_setguardsize(pthread_attr_t *attr,
+                                   size_t guardsize);
+    int  pthread_attr_getguardsize(const pthread_attr_t *attr,
+                                   size_t *guardsize);
+
     /*
      * PThread Functions
      */
