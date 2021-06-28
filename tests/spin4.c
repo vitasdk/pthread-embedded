@@ -67,6 +67,7 @@ static void * func(void * arg)
 
 int pthread_test_spin4()
 {
+  lock = PTHREAD_SPINLOCK_INITIALIZER;
   long result = 0;
   pthread_t t;
   struct _timeb sysTime;
