@@ -833,6 +833,12 @@ extern "C" {
     int  pthread_condattr_setpshared (pthread_condattr_t * attr,
                                       int pshared);
 
+    int  pthread_condattr_getclock (const pthread_condattr_t * attr,
+                                    clockid_t *clock_id);
+
+    int  pthread_condattr_setclock (pthread_condattr_t * attr,
+                                    clockid_t clock_id);
+
     /*
      * Condition Variable Functions
      */

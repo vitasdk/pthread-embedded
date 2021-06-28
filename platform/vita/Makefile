@@ -131,7 +131,9 @@ CONDVAR_OBJS = \
   pthread_condattr_destroy.o \
   pthread_condattr_getpshared.o \
   pthread_condattr_init.o \
-  pthread_condattr_setpshared.o
+  pthread_condattr_setpshared.o \
+  pthread_condattr_getclock.o \
+  pthread_condattr_setclock.o
 
 RWLOCK_OBJS = \
   pthread_rwlock_init.o \
