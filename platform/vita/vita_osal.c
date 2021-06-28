@@ -57,7 +57,7 @@
 #define PTHREAD_EVID_CANCEL 0x1
 
 #if 1
-#define PSP_DEBUG(x) printf(x)
+#define PSP_DEBUG(...) printf(__VA_ARGS__)
 #else
 #define PSP_DEBUG(x)
 #endif
@@ -95,7 +95,8 @@ static inline int invert_priority(int priority)
  */
 int pspStubThreadEntry (unsigned int argc, void *argv)
 {
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(0);
+	SceUID thid = sceKernelGetThreadId();
+	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(thid);
 	return (*(pThreadData->entryPoint))(pThreadData->argv);
 }
 
@@ -174,7 +175,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 		}
 		else
 		{
-			PSP_DEBUG("sceKernelCreateThread: PTE_OS_GENERAL_FAILURE\n");
+			PSP_DEBUG("sceKernelCreateThread: PTE_OS_GENERAL_FAILURE: %x\n", thid);
 			return PTE_OS_GENERAL_FAILURE;
 		}
 	}
