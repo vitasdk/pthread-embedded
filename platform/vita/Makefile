@@ -32,6 +32,7 @@ SUPPORT_OBJS = \
   pte_new.o \
   pte_threadStart.o \
   global.o \
+  pte_reuse.o \
   pthread_init.o \
   pthread_terminate.o
 

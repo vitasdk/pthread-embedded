@@ -70,12 +70,14 @@ pthread_equal (pthread_t t1, pthread_t t2)
  */
 {
   int result;
+  pte_thread_t* pt1 = (pte_thread_t*)t1;
+  pte_thread_t* pt2 = (pte_thread_t*)t2;
 
   /*
    * We also accept NULL == NULL - treating NULL as a thread
    * for this special case, because there is no error that we can return.
    */
-  result = ( t1 == t2 );
+  result = ( t1 == t2 && pt1->threadId == pt2->threadId && (pt1->threadId !=0 && pt2->threadId !=0));
 
   return (result);
 
