@@ -53,8 +53,14 @@ static void runSemTests(void)
 
 }
 
-static void runThreadTests(void)
+static void runThreadTests(int iteration)
 {
+  if (iteration < 1) {
+      printf("Reuse test #1\n");
+      pthread_test_reuse1();
+  } else {
+      printf("Skipping Reuse test #1 (required to run first on first iteration only)\n");
+  }
 
   printf("Create test #1\n");
   pthread_test_create1();
@@ -92,24 +98,16 @@ static void runThreadTests(void)
   printf("Exit test #3\n");
   pthread_test_exit3();
 
-// TODO  Those two break on vite due to wrong thread params
-//  printf("Exit test #4\n");
-//  pthread_test_exit4();
+/* TODO:  Those two break on vite due to wrong thread data.
+          Need to re-implement thread data creation (see pthread_create)
+*/
+/*
+  printf("Exit test #4\n");
+  pthread_test_exit4();
 
-//  printf("Exit test #5\n");
-//  pthread_test_exit5();
-
-  /* These tests can not be run in series with other tests,
-   * as they rely on knowing what is on the reuse queue.
-   */
-  /*
-    printf("Reuse test #1\n");
-    pthread_test_reuse1();
-
-    printf("Reuse test #2\n");
-    pthread_test_reuse2();
-  */
-
+  printf("Exit test #5\n");
+  pthread_test_exit5();
+*/
   printf("Priority test #1\n");
   pthread_test_priority1();
 
@@ -274,8 +272,8 @@ static void runSpinTests()
   pthread_test_spin3();
 
 // TODO: That one breakes on vita, probably due to wrong proc count implementation.
-//  printf("Spin test #4\n");
-//  pthread_test_spin4();
+  printf("Spin test #4\n");
+  pthread_test_spin4();
 
 }
 
@@ -463,13 +461,13 @@ void pte_test_main()
     }
 
   printf("Running tests...\n");
-  for (i=0;i<2;i++)
+  for (i=0; i<2; i++)
     {
       printf("=========================\n");
       printf("   Test iteration #%d\n\n",i);
       printf("=========================\n");
 
-      runThreadTests(); 
+      runThreadTests(i);
       runMiscTests();
       runMutexTests();
       runSemTests();
@@ -481,7 +479,6 @@ void pte_test_main()
       runExceptionTests();
       runBenchTests();
       runStressTests();
-
     }
 
   printf("Tests complete!\n");

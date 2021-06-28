@@ -59,7 +59,8 @@ MISC_TEST_OBJS = \
   tsd1.o \
   tsd2.o \
   stress1.o \
-  detach1.o
+  detach1.o \
+  reuse1.o
 
 SEM_TEST_OBJS = \
   semaphore1.o \
@@ -94,11 +95,12 @@ THREAD_TEST_OBJS = \
   exit1.o \
   exit2.o \
   exit3.o \
-  exit4.o \
-  exit5.o \
   priority1.o \
   priority2.o \
   inherit1.o
+
+#  exit4.o
+#  exit5.o
 
 
 SPIN_TEST_OBJS = \
