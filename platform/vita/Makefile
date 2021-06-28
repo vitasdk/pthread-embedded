@@ -194,5 +194,7 @@ install: $(TARGET_LIB)
 	@install -d $(DESTDIR)$(PREFIX)/lib
 	@install -m644 $(TARGET_LIB) $(PREFIX)$(PSPDIR)/lib
 	@install -d $(DESTDIR)$(PREFIX)/include
-	@install -m644 *.h $(DESTDIR)$(PREFIX)/include
-	@install -m644 ../../*.h $(DESTDIR)$(PREFIX)/include
+	@install -m644 pte_types.h $(DESTDIR)$(PREFIX)/include
+	@install -m644 ../../pthread_public.h $(DESTDIR)$(PREFIX)/include/pthread.h
+	@install -m644 ../../sched.h $(DESTDIR)$(PREFIX)/include/
+	@install -m644 ../../semaphore.h $(DESTDIR)$(PREFIX)/include/
