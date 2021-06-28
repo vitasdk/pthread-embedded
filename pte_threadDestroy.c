@@ -63,8 +63,14 @@ pte_threadDestroyCommon (pthread_t thread, unsigned char shouldThreadExit)
        */
       memcpy (&threadCopy, tp, sizeof (threadCopy));
 
-      tp->threadId = 0;
-      tp->ptHandle = NULL;
+//      tp->threadId = 0;
+//      tp->ptHandle = NULL;
+
+      /*
+       * Thread ID structs are never freed. They're NULLed and reused.
+       * This also sets the thread to PThreadStateInitial (invalid).
+       */
+      pte_threadReusePush (thread);
 
       (void) pthread_mutex_destroy(&threadCopy.cancelLock);
       (void) pthread_mutex_destroy(&threadCopy.threadLock);
