@@ -57,7 +57,7 @@ typedef SceUID pte_osMutexHandle;
 
 int PspInterlockedExchange(int *ptarg, int val);
 int PspInterlockedCompareExchange(int *pdest, int exchange, int comp);
-int  PspInterlockedExchangeAdd(int volatile* pAddend, int value);
+int PspInterlockedExchangeAdd(int volatile* pAddend, int value);
 int PspInterlockedDecrement(int *pdest);
 int PspInterlockedIncrement(int *pdest);
 
