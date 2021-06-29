@@ -271,7 +271,6 @@ static void runSpinTests()
   printf("Spin test #3\n");
   pthread_test_spin3();
 
-// TODO: That one breakes on vita, probably due to wrong proc count implementation.
   printf("Spin test #4\n");
   pthread_test_spin4();
 
