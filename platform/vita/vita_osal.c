@@ -50,16 +50,15 @@
 // debug
 #include <stdarg.h>
 
-#define MAX_PSP_UID 2048 // SWAG
-
 #define DEFAULT_STACK_SIZE_BYTES 0x1000
 
 #define PTHREAD_EVID_CANCEL 0x1
 
 #if 1
-#define PSP_DEBUG(...) printf(__VA_ARGS__)
+#include <psp2/kernel/clib.h>
+#define DEBUG_PRINT(...) sceClibPrintf(__VA_ARGS__)
 #else
-#define PSP_DEBUG(x)
+#define DEBUG_PRINT(...)
 #endif
 
 typedef struct tlsKeyEntry
@@ -116,7 +115,7 @@ pte_osResult pte_osInit(void)
 
 	if (pThreadData == NULL)
 	{
-		PSP_DEBUG("malloc(pspThreadData): PTE_OS_NO_RESOURCES\n");
+		DEBUG_PRINT("malloc(pspThreadData): PTE_OS_NO_RESOURCES\n");
 		return PTE_OS_NO_RESOURCES;
 	}
 
@@ -153,7 +152,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 
 	if (pThreadData == NULL)
 	{
-		PSP_DEBUG("malloc(pspThreadData): PTE_OS_NO_RESOURCES\n");
+		DEBUG_PRINT("malloc(pspThreadData): PTE_OS_NO_RESOURCES\n");
 		return PTE_OS_NO_RESOURCES;
 	}
 
@@ -170,12 +169,12 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 		// TODO: expand this further
 		if (thid == SCE_KERNEL_ERROR_NO_MEMORY)
 		{
-			PSP_DEBUG("sceKernelCreateThread: PTE_OS_NO_RESOURCES\n");
+			DEBUG_PRINT("sceKernelCreateThread: PTE_OS_NO_RESOURCES\n");
 			return PTE_OS_NO_RESOURCES;
 		}
 		else
 		{
-			PSP_DEBUG("sceKernelCreateThread: PTE_OS_GENERAL_FAILURE: %x\n", thid);
+			DEBUG_PRINT("sceKernelCreateThread: PTE_OS_GENERAL_FAILURE: %x\n", thid);
 			return PTE_OS_GENERAL_FAILURE;
 		}
 	}
