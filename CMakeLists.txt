@@ -4,6 +4,8 @@ project(pthread-embedded LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 
+option(BUILD_TESTSUITE "Build testsuite" OFF)
+
 if (VITA)
   include("$ENV{VITASDK}/share/vita.cmake" REQUIRED)
 endif()
@@ -46,28 +48,31 @@ add_library(pthread STATIC
   ${PLATFORM_SOURCES}
 )
 
-add_executable(pthread-test
-  ${TEST_SOURCES}
-)
+if (BUILD_TESTSUITE)
 
-target_link_libraries(pthread-test pthread)
-
-if(VITA)
-  vita_create_self(pthread-test.self pthread-test UNSAFE)
-
-  vita_create_vpk(pthread-test.vpk ${VITA_TITLEID} pthread-test.self
-    VERSION ${VITA_VERSION}
-    NAME ${VITA_APP_NAME}
-    FILE platform/vita/sce_sys sce_sys
+  add_executable(pthread-test
+    ${TEST_SOURCES}
   )
-elseif (PLATFORM_PSP)
+
+  target_link_libraries(pthread-test pthread)
+
+  if(VITA)
+    vita_create_self(pthread-test.self pthread-test UNSAFE)
+
+    vita_create_vpk(pthread-test.vpk ${VITA_TITLEID} pthread-test.self
+      VERSION ${VITA_VERSION}
+      NAME ${VITA_APP_NAME}
+      FILE platform/vita/sce_sys sce_sys
+    )
+  elseif (PLATFORM_PSP)
     target_link_libraries(pthread-test
-        ${PSP_LIBRARIES}
+      ${PSP_LIBRARIES}
     )
     create_pbp_file(
-        TARGET pthread-test
-        TITLE ${PSP_APP_NAME}
+      TARGET pthread-test
+      TITLE ${PSP_APP_NAME}
     )
+  endif()
 endif()
 
 install(FILES
