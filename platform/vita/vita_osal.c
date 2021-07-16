@@ -236,11 +236,11 @@ pte_osResult pte_osThreadWaitForEnd(pte_osThreadHandle threadHandle)
 {
 	int status = 0;
 	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(0);
-
+	SceUID evid = pThreadData->evid;
 	while (1)
 	{
 		unsigned int bits = 0;
-		sceKernelPollEventFlag(pThreadData->evid, PTHREAD_EVID_CANCEL, SCE_EVENT_WAITAND, &bits);
+		sceKernelPollEventFlag(evid, PTHREAD_EVID_CANCEL, SCE_EVENT_WAITAND, &bits);
 
 		if (bits & PTHREAD_EVID_CANCEL)
 		{
@@ -454,11 +454,11 @@ pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, uns
 {
 	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(0);
 	SceUInt32 start = sceKernelGetProcessTimeLow();
-
+	SceUID evid = pThreadData->evid;
 	while (1)
 	{
 		unsigned int bits = 0;
-		sceKernelPollEventFlag(pThreadData->evid, PTHREAD_EVID_CANCEL, SCE_EVENT_WAITAND, &bits);
+		sceKernelPollEventFlag(evid, PTHREAD_EVID_CANCEL, SCE_EVENT_WAITAND, &bits);
 
 		if (bits & PTHREAD_EVID_CANCEL)
 			return PTE_OS_INTERRUPTED;
