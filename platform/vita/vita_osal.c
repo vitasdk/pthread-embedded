@@ -139,6 +139,13 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
                                 void *argv,
                                 pte_osThreadHandle* ppte_osThreadHandle)
 {
+	/* pthread_create was called by non-pthread thread */
+	if (*(pspThreadData **)vitasdk_get_pthread_data(0) == NULL) {
+		if (pte_osInit() != PTE_OS_OK) {
+			return PTE_OS_NO_RESOURCES;
+		}
+	}
+
 	SceUID thid;
 
 	if (stackSize < DEFAULT_STACK_SIZE_BYTES)
