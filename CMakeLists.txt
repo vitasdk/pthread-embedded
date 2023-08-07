@@ -77,24 +77,24 @@ endif()
 
 install(FILES
     pthread_public.h
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/
+    DESTINATION include
     RENAME pthread.h
 )
 
 install(FILES
     sched.h semaphore.h
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/
+    DESTINATION include
 )
 
 if(VITA)
   install(FILES
     platform/vita/pte_types.h
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/
+    DESTINATION include
   )
 elseif (PLATFORM_PSP)
   install(FILES
     platform/psp/pte_types.h
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/
+    DESTINATION include
   )
 endif()
 
