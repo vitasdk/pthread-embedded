@@ -754,4 +754,9 @@ extern "C" {
 #undef PTE_LEVEL
 #undef PTE_LEVEL_MAX
 
+#ifdef NULL
+#undef NULL
+#define NULL 0
+#endif
+
 #endif /* PTHREAD_H */
