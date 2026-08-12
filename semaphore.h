@@ -52,6 +52,20 @@
 #if !defined( SEMAPHORE_H )
 #define SEMAPHORE_H
 
+/* This header declares its own dependencies rather than relying on what a
+ * translation unit happens to have included first.
+ *
+ * sem_open() takes mode_t and sem_timedwait() takes struct timespec. POSIX
+ * declares sem_open() variadic, so the standard does not require mode_t to be
+ * visible here; this implementation chose a fixed signature that uses it, so
+ * the obligation is ours.
+ *
+ * Both used to arrive by accident: newlib's <stdio.h> included <sys/types.h>
+ * until 2022 (upstream 357d7fcc6, first released in newlib 4.3.0), so any
+ * consumer that included <stdio.h> first got them. */
+#include <sys/types.h>
+#include <time.h>
+
 #if defined(_POSIX_SOURCE)
 #define PTE_LEVEL 0
 /* Early POSIX */
