@@ -223,16 +223,21 @@ pte_osResult pte_osThreadDelete(pte_osThreadHandle handle)
 	return PTE_OS_OK;
 }
 
+// newlib, no public header: a thread must reclaim its own TLS-resident
+// buffers before exiting, nothing can reach them from outside afterwards.
+extern int vita_exit_thread(int exit_status);
+extern int vita_exit_delete_thread(int exit_status);
+
 pte_osResult pte_osThreadExitAndDelete(pte_osThreadHandle handle)
 {
 	pte_osThreadDelete(handle);
-	sceKernelExitDeleteThread(0);
+	vita_exit_delete_thread(0);
 	return PTE_OS_OK;
 }
 
 void pte_osThreadExit()
 {
-	sceKernelExitThread(0);
+	vita_exit_thread(0);
 }
 
 /*
