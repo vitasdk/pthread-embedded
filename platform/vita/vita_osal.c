@@ -47,8 +47,8 @@
 #  include <sys/vita_thread.h>
 # endif
 #endif
-#ifndef __VITA_NEWLIB_THREAD_SLOT__
-#define __VITA_NEWLIB_THREAD_SLOT__ 1
+#ifndef __VITA_NEWLIB_OWNS_THREAD_SLOT__
+#define __VITA_NEWLIB_OWNS_THREAD_SLOT__ 1
 #endif
 
 /* For ftime */
@@ -102,7 +102,7 @@ typedef struct pspThreadData
    and a TPIDRURO-relative block could never give them. */
 #define PTE_TLS_KEY 0x89
 
-#if __VITA_NEWLIB_THREAD_SLOT__
+#if __VITA_NEWLIB_OWNS_THREAD_SLOT__
 static inline pspThreadData **pte_thread_slot(SceUID thid)
 {
 	return (pspThreadData **)vitasdk_get_pthread_data(thid);
