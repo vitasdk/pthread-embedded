@@ -42,6 +42,15 @@
 
 #include <vitasdk/utils.h>
 
+#if defined(__has_include)
+# if __has_include(<sys/vita_thread.h>)
+#  include <sys/vita_thread.h>
+# endif
+#endif
+#ifndef __VITA_NEWLIB_OWNS_THREAD_SLOT__
+#define __VITA_NEWLIB_OWNS_THREAD_SLOT__ 1
+#endif
+
 /* For ftime */
 #include <sys/time.h>
 #include <sys/types.h>
@@ -82,7 +91,51 @@ typedef struct pspThreadData
        polled in pte_osSemaphoreCancellablePend */
 	SceUID evid;
 
+	/* Head of this thread's key/value list. Unused while newlib owns the
+	   kernel TLS slot and keeps this list in a second slot of its own. */
+	tlsKeyEntry *tls;
+
   } pspThreadData;
+
+/* One kernel TLS slot per thread holds the pointer above, reachable from any
+   other thread through its thid -- which pte_osThreadCancel and friends need
+   and a TPIDRURO-relative block could never give them. */
+#define PTE_TLS_KEY 0x89
+
+#if __VITA_NEWLIB_OWNS_THREAD_SLOT__
+static inline pspThreadData **pte_thread_slot(SceUID thid)
+{
+	return (pspThreadData **)vitasdk_get_pthread_data(thid);
+}
+
+static inline tlsKeyEntry **pte_tls_head(SceUID thid, pspThreadData *data)
+{
+	(void)data;
+	return (tlsKeyEntry **)vitasdk_get_tls_data(thid);
+}
+
+static inline void pte_thread_slot_release(SceUID thid)
+{
+	vitasdk_delete_thread_reent(thid);
+}
+#else
+static inline pspThreadData **pte_thread_slot(SceUID thid)
+{
+	return thid ? (pspThreadData **)sceKernelGetThreadTLSAddr(thid, PTE_TLS_KEY)
+	            : (pspThreadData **)sceKernelGetTLSAddr(PTE_TLS_KEY);
+}
+
+static inline tlsKeyEntry **pte_tls_head(SceUID thid, pspThreadData *data)
+{
+	(void)thid;
+	return data ? &data->tls : NULL;
+}
+
+static inline void pte_thread_slot_release(SceUID thid)
+{
+	*pte_thread_slot(thid) = NULL;
+}
+#endif
 
 static inline int invert_priority(int priority)
 {
@@ -95,7 +148,7 @@ static inline int invert_priority(int priority)
 int pspStubThreadEntry (unsigned int argc, void *argv)
 {
 	SceUID thid = sceKernelGetThreadId();
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(thid);
+	pspThreadData *pThreadData = *pte_thread_slot(thid);
 	return (*(pThreadData->entryPoint))(pThreadData->argv);
 }
 
@@ -111,7 +164,7 @@ pte_osResult pte_osInit(void)
 	 * 1. Entry point and parameters for the user thread's main function.
 	 * 2. Semaphore used for thread cancellation.
 	 */
-	pspThreadData *pThreadData = (pspThreadData *)malloc(sizeof(pspThreadData));
+	pspThreadData *pThreadData = (pspThreadData *)calloc(1, sizeof(pspThreadData));
 
 	if (pThreadData == NULL)
 	{
@@ -119,7 +172,7 @@ pte_osResult pte_osInit(void)
 		return PTE_OS_NO_RESOURCES;
 	}
 
-	pspThreadData **addr = (pspThreadData **)vitasdk_get_pthread_data(0);
+	pspThreadData **addr = pte_thread_slot(0);
 
 	pThreadData->evid = sceKernelCreateEventFlag("", 0, 0, NULL);
 
@@ -140,7 +193,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
                                 pte_osThreadHandle* ppte_osThreadHandle)
 {
 	/* pthread_create was called by non-pthread thread */
-	if (*(pspThreadData **)vitasdk_get_pthread_data(0) == NULL) {
+	if (*pte_thread_slot(0) == NULL) {
 		if (pte_osInit() != PTE_OS_OK) {
 			return PTE_OS_NO_RESOURCES;
 		}
@@ -155,7 +208,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 	 * 1. Entry point and parameters for the user thread's main function.
 	 * 2. Semaphore used for thread cancellation.
 	 */
-	pspThreadData *pThreadData = (pspThreadData *)malloc(sizeof(pspThreadData));
+	pspThreadData *pThreadData = (pspThreadData *)calloc(1, sizeof(pspThreadData));
 
 	if (pThreadData == NULL)
 	{
@@ -186,7 +239,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 		}
 	}
 
-	pspThreadData **addr = (pspThreadData **)vitasdk_get_pthread_data(thid);
+	pspThreadData **addr = pte_thread_slot(thid);
 
 	*ppte_osThreadHandle = thid;
 	pThreadData->entryPoint = entryPoint;
@@ -205,10 +258,9 @@ pte_osResult pte_osThreadStart(pte_osThreadHandle osThreadHandle)
 
 pte_osResult pte_osThreadDelete(pte_osThreadHandle handle)
 {
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(handle);
-	sceKernelDeleteEventFlag(pThreadData->evid);
-	free(pThreadData);
-	tlsKeyEntry *entry = *(tlsKeyEntry **)vitasdk_get_tls_data(handle);
+	pspThreadData *pThreadData = *pte_thread_slot(handle);
+	tlsKeyEntry **head = pte_tls_head(handle, pThreadData);
+	tlsKeyEntry *entry = head ? *head : NULL;
 
 	while (entry)
 	{
@@ -217,22 +269,35 @@ pte_osResult pte_osThreadDelete(pte_osThreadHandle handle)
 		free(ent2);
 	}
 
-	*(tlsKeyEntry **)vitasdk_get_tls_data(handle) = NULL;
-	vitasdk_delete_thread_reent(handle);
+	if (head)
+		*head = NULL;
+
+	if (pThreadData)
+	{
+		sceKernelDeleteEventFlag(pThreadData->evid);
+		free(pThreadData);
+	}
+
+	pte_thread_slot_release(handle);
 	sceKernelDeleteThread(handle);
 	return PTE_OS_OK;
 }
 
+// newlib, no public header: a thread must reclaim its own TLS-resident
+// buffers before exiting, nothing can reach them from outside afterwards.
+extern int vita_exit_thread(int exit_status);
+extern int vita_exit_delete_thread(int exit_status);
+
 pte_osResult pte_osThreadExitAndDelete(pte_osThreadHandle handle)
 {
 	pte_osThreadDelete(handle);
-	sceKernelExitDeleteThread(0);
+	vita_exit_delete_thread(0);
 	return PTE_OS_OK;
 }
 
 void pte_osThreadExit()
 {
-	sceKernelExitThread(0);
+	vita_exit_thread(0);
 }
 
 /*
@@ -242,7 +307,7 @@ void pte_osThreadExit()
 pte_osResult pte_osThreadWaitForEnd(pte_osThreadHandle threadHandle)
 {
 	int status = 0;
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(0);
+	pspThreadData *pThreadData = *pte_thread_slot(0);
 	SceUID evid = pThreadData->evid;
 	while (1)
 	{
@@ -297,7 +362,7 @@ pte_osResult pte_osThreadSetPriority(pte_osThreadHandle threadHandle, int newPri
 
 pte_osResult pte_osThreadCancel(pte_osThreadHandle threadHandle)
 {
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(threadHandle);
+	pspThreadData *pThreadData = *pte_thread_slot(threadHandle);
 
 	int res = sceKernelSetEventFlag(pThreadData->evid, PTHREAD_EVID_CANCEL);
 
@@ -310,7 +375,7 @@ pte_osResult pte_osThreadCancel(pte_osThreadHandle threadHandle)
 
 pte_osResult pte_osThreadCheckCancel(pte_osThreadHandle threadHandle)
 {
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(threadHandle);
+	pspThreadData *pThreadData = *pte_thread_slot(threadHandle);
 
 	unsigned int bits = 0;
 	sceKernelPollEventFlag(pThreadData->evid, PTHREAD_EVID_CANCEL, SCE_EVENT_WAITAND, &bits);
@@ -480,7 +545,7 @@ pte_osResult pte_osSemaphorePend(pte_osSemaphoreHandle handle, unsigned int *pTi
  */
 pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, unsigned int *pTimeout)
 {
-	pspThreadData *pThreadData = *(pspThreadData **)vitasdk_get_pthread_data(0);
+	pspThreadData *pThreadData = *pte_thread_slot(0);
 	SceUInt32 start = sceKernelGetProcessTimeLow();
 	SceUID evid = pThreadData->evid;
 	while (1)
@@ -565,7 +630,19 @@ int pte_osAtomicIncrement(int *pdest)
 
 pte_osResult pte_osTlsSetValue(unsigned int key, void * value)
 {
-	tlsKeyEntry *entry = *(tlsKeyEntry **)vitasdk_get_tls_data(0);
+	tlsKeyEntry **head = pte_tls_head(0, *pte_thread_slot(0));
+
+	if (!head)
+	{
+		if (pte_osInit() != PTE_OS_OK)
+			return PTE_OS_NO_RESOURCES;
+
+		head = pte_tls_head(0, *pte_thread_slot(0));
+		if (!head)
+			return PTE_OS_NO_RESOURCES;
+	}
+
+	tlsKeyEntry *entry = *head;
 	tlsKeyEntry *prev = NULL;
 
 	while (entry)
@@ -587,7 +664,7 @@ pte_osResult pte_osTlsSetValue(unsigned int key, void * value)
 		if (prev)
 			prev->next = entry;
 		else
-			*(tlsKeyEntry **)vitasdk_get_tls_data(0) = entry;
+			*head = entry;
 	}
 
 	entry->value = value;
@@ -596,7 +673,8 @@ pte_osResult pte_osTlsSetValue(unsigned int key, void * value)
 
 void * pte_osTlsGetValue(unsigned int index)
 {
-	tlsKeyEntry *entry = *(tlsKeyEntry **)vitasdk_get_tls_data(0);
+	tlsKeyEntry **head = pte_tls_head(0, *pte_thread_slot(0));
+	tlsKeyEntry *entry = head ? *head : NULL;
 
 	while (entry)
 	{
