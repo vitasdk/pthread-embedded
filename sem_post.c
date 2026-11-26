@@ -102,10 +102,12 @@ sem_post (sem_t * sem)
 
       if (s->value < SEM_VALUE_MAX)
         {
-          pte_osResult osResult = pte_osSemaphorePost(s->sem, 1);
-
+          /* Only release the OS semaphore when a thread is blocked on it
+           * (value was negative), as in pthreads-win32. Releasing it on
+           * every post leaves stale counts that let later waiters return
+           * without a matching post. */
           if (++s->value <= 0
-              && (osResult != PTE_OS_OK))
+              && (pte_osSemaphorePost(s->sem, 1) != PTE_OS_OK))
             {
               s->value--;
               result = EINVAL;
